@@ -3,6 +3,7 @@ package com.epam.esm.dto.impl;
 import com.epam.esm.dto.GenericCrudDto;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class GiftCertificateUpdateDto extends GenericCrudDto {
     private Long id;
@@ -10,6 +11,8 @@ public class GiftCertificateUpdateDto extends GenericCrudDto {
     private String description;
     private BigDecimal price;
     private Integer duration;
+
+    private List<TagDto> tagList;
 
     public GiftCertificateUpdateDto() {
     }
@@ -60,5 +63,13 @@ public class GiftCertificateUpdateDto extends GenericCrudDto {
 
     public void setDuration(Integer duration) {
         this.duration = duration;
+    }
+
+    public List<TagDto> getTagList() {
+        return tagList;
+    }
+
+    public void setTagList(List<TagDto> tagList) {
+        this.tagList = tagList;
     }
 }

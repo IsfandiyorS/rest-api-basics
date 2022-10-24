@@ -3,6 +3,7 @@ package com.epam.esm.exceptions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -26,10 +27,11 @@ public class GlobalExceptionHandler {
 //        );
 //    }
 
-    @ExceptionHandler({MethodArgumentTypeMismatchException.class, JsonProcessingException.class})
-    public final ResponseEntity<Object> handleBadRequestExceptions() {
-        ExceptionResponse errorResponse = new ExceptionResponse(BAD_REQUEST.value(), "string alijon");
-        return new ResponseEntity<>(errorResponse, BAD_REQUEST);
+    @ExceptionHandler({MethodArgumentNotValidException.class, JsonProcessingException.class})
+    public final ResponseEntity<Object> handleBadRequestExceptions(
+            final MethodArgumentNotValidException exception, final   HttpStatus status) {
+        ExceptionResponse errorResponse = new ExceptionResponse(status.value(), exception.getMessage());
+        return new ResponseEntity<>(errorResponse, status);
     }
 
 //    @ResponseStatus(NOT_FOUND)
@@ -42,7 +44,7 @@ public class GlobalExceptionHandler {
 //    }
 
     @ResponseStatus(NOT_FOUND)
-    @ExceptionHandler(value = {ObjectNotFoundException.class})
+    @ExceptionHandler(value = {ObjectNotFoundException.class, DaoException.class})
     public ResponseEntity<ExceptionResponse> handleNotFoundException(
             final RuntimeException ex, final WebRequest request) {
         return constructExceptionResponse(ex, request, NOT_FOUND);

@@ -1,8 +1,8 @@
 package com.epam.esm.validation;
 
 import com.epam.esm.dto.CrudDto;
-import com.epam.esm.dto.GenericDto;
-import com.epam.esm.entity.Identifiable;
+
+import java.util.Map;
 
 /**
  * @param <CR>
@@ -12,6 +12,6 @@ public interface BaseValidator<CR extends CrudDto, UP extends CrudDto> {
 
     boolean isCreateDtoValid(CR createDto);
 
-    default boolean isUpdateDtoValid(UP updateDto){return false;};
+    default boolean isUpdateDtoValid(UP updateDto, Map<String , String> updateFieldsMap){return false;};
 
 }

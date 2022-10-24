@@ -8,6 +8,10 @@ public class TagDto extends GenericDto {
     public TagDto(){
     }
 
+    public TagDto(String name) {
+        this.name = name;
+    }
+
     public TagDto(Long id, String name) {
         super(id);
         this.name = name;

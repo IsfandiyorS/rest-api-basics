@@ -9,8 +9,6 @@ import com.epam.esm.entity.Tag;
 import com.epam.esm.enums.ErrorCodes;
 import com.epam.esm.exceptions.AlreadyExistException;
 import com.epam.esm.exceptions.ObjectNotFoundException;
-import com.epam.esm.exceptions.ValidationException;
-import com.epam.esm.mapper.TagConverter;
 import com.epam.esm.service.AbstractCrudService;
 import com.epam.esm.service.TagService;
 import com.epam.esm.validation.TagValidator;
@@ -18,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,35 +25,27 @@ import static java.lang.String.format;
 public class TagServiceImpl extends AbstractCrudService<Tag, TagDto, TagCreateDto, TagUpdateDto, TagDaoImpl> implements TagService {
 
     private final TagDaoImpl tagDao;
-    private final TagConverter converter;
     private final TagValidator validator;
 
     @Autowired
-    public TagServiceImpl(TagDaoImpl tagDao, TagConverter converter, TagValidator validator) {
+    public TagServiceImpl(TagDaoImpl tagDao, TagValidator validator) {
         this.tagDao = tagDao;
-        this.converter = converter;
         this.validator = validator;
     }
 
     @Override
     public ResponseEntity<TagDto> get(Long id) {
-        Optional<Tag> optionalTag = tagDao.findById(id);
+        Optional<TagDto> optionalTag = tagDao.findById(id);
         if (optionalTag.isEmpty()) {
             throw new ObjectNotFoundException(format(ErrorCodes.OBJECT_NOT_FOUND_ID.message, "Tag", id));
         }
 
-        return ResponseEntity.ok(converter.convertObjectToDto(optionalTag.get()));
+        return ResponseEntity.ok(optionalTag.get());
     }
 
     @Override
     public ResponseEntity<List<TagDto>> getAll() {
-        List<Tag> tagList = tagDao.getAll();
-        List<TagDto> tagDtoList = new ArrayList<>();
-
-        for (Tag tag : tagList) {
-            tagDtoList.add(converter.convertObjectToDto(tag));
-        }
-        return ResponseEntity.ok(tagDtoList);
+        return ResponseEntity.ok(tagDao.getAll());
     }
 
     @Override
@@ -64,20 +53,20 @@ public class TagServiceImpl extends AbstractCrudService<Tag, TagDto, TagCreateDt
 
         validator.isCreateDtoValid(dto);
 
-        Optional<Tag> optionalTag = tagDao.findByName(dto.getName());
+        Optional<TagDto> optionalTag = tagDao.findByName(dto.getName());
 
         if (optionalTag.isPresent()) {
             throw new AlreadyExistException(format(ErrorCodes.OBJECT_ALREADY_EXIST.message, "Tag", "name"));
         }
 
-        return ResponseEntity.ok(new GenericDto(tagDao.save(converter.convertDtoToObject(dto))));
+        return ResponseEntity.ok(new GenericDto(tagDao.save(dto)));
 
     }
 
     @Override
     public ResponseEntity<Boolean> delete(Long id) {
 
-        Optional<Tag> optionalTag = tagDao.findById(id);
+        Optional<TagDto> optionalTag = tagDao.findById(id);
 
         if (optionalTag.isEmpty()) {
             throw new ObjectNotFoundException(format(ErrorCodes.OBJECT_NOT_FOUND_ID.message, "Tag", id));

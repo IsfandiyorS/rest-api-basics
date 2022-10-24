@@ -2,37 +2,45 @@ package com.epam.esm.dao.impl;
 
 import com.epam.esm.constant.QueryForTagTable;
 import com.epam.esm.dao.TagDao;
-import com.epam.esm.entity.Tag;
+import com.epam.esm.dto.impl.TagCreateDto;
+import com.epam.esm.dto.impl.TagDto;
 import com.epam.esm.mapper.TagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
+import static com.epam.esm.constant.QueryForTagTable.*;
 
 @Repository
 public class TagDaoImpl implements TagDao {
 
     private final JdbcTemplate jdbcTemplate;
+    private final TagMapper tagMapper;
 
     @Autowired
-    public TagDaoImpl(JdbcTemplate jdbcTemplate) {
+    public TagDaoImpl(JdbcTemplate jdbcTemplate, TagMapper tagMapper) {
         this.jdbcTemplate = jdbcTemplate;
+        this.tagMapper = tagMapper;
     }
 
     @Override
-    public Long save(Tag tag) {
+    public Long save(TagCreateDto tag) {
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(
                 connection -> {
                     PreparedStatement ps =
-                            connection.prepareStatement(QueryForTagTable.INSERT_TAG_QUERY, new String[]{"id"});
+                            connection.prepareStatement(INSERT_TAG_QUERY, new String[]{"id"});
                     ps.setString(1, tag.getName());
                     return ps;
                 },
@@ -42,22 +50,27 @@ public class TagDaoImpl implements TagDao {
 
     @Override
     public void removeById(Long id) {
-        jdbcTemplate.update(QueryForTagTable.DELETE_TAG_QUERY, id);
+        jdbcTemplate.update(DELETE_TAG_QUERY, id);
     }
 
     @Override
-    public Optional<Tag> findById(Long id) {
-        return jdbcTemplate.query(QueryForTagTable.GET_TAG_BY_ID, new TagMapper(), id).stream().findAny();
+    public Optional<TagDto> findById(Long id) {
+        return jdbcTemplate.query(GET_TAG_BY_ID, tagMapper, id).stream().findAny();
     }
 
     @Override
-    public List<Tag> getAll() {
-        return jdbcTemplate.query(QueryForTagTable.GET_ALL_TAG, new TagMapper());
+    public List<TagDto> getAll() {
+        return jdbcTemplate.query(GET_ALL_TAG, tagMapper);
     }
 
     @Override
-    public Optional<Tag> findByName(String name) {
-        return jdbcTemplate.query(QueryForTagTable.GET_TAG_BY_NAME, new TagMapper(), name).stream().findAny();
+    public Optional<TagDto> findByName(String name) {
+        return jdbcTemplate.query(GET_TAG_BY_NAME, tagMapper, name).stream().findAny();
+    }
+
+    @Override
+    public List<TagDto> getAttachedTagsWithGiftCertificateId(Long giftCertificateId) {
+        return jdbcTemplate.query(GET_ATTACHED_TAGS_BY_GIFT_CERTIFICATE_ID, tagMapper, giftCertificateId);
     }
 
     @Override
@@ -66,30 +79,11 @@ public class TagDaoImpl implements TagDao {
         jdbcTemplate.execute(query);
     }
 
-//    public void updateTags() {
-////        if (item.getTags() == null) {
-////            return;
-////        }
-//        List<Long> tagIds = getTagsIds(item.getTags());
-//        for (Long id : tagIds) {
-//            executeUpdateQuery(ADD_TAGS_QUERY, giftCertificateId, id);
-//        }
-//    }
+    @Override
+    public boolean checkForAvailabilityOfTagIdInRelatedTable(Long tagId, Long giftCertificateId) {
+        List<Long> longList = jdbcTemplate.query(GET_TAG_ID_FROM_RELATED_TABLE, (rs, rowNum) -> rs.getLong("tag_id"), tagId, giftCertificateId);
+        return longList.size()>0;
+    }
 
-//    private List<Long> getTagsIds(List<Tag> tags) {
-//        List<Long> tagIds = new ArrayList();
-//        tags.stream().forEach(tag -> {
-//            String tagName = tag.getName();
-//            Tag tagWithId = null;
-//
-//            try {
-//                tagWithId = tagDao.getByName(tagName).get(0);
-//            } catch (DaoException e) {
-//                e.printStackTrace();
-//            }
-//
-//            tagIds.add(tagWithId.getId());
-//        });
-//        return tagIds;
-//    }
+
 }

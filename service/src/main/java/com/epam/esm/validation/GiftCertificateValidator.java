@@ -2,6 +2,9 @@ package com.epam.esm.validation;
 
 import com.epam.esm.dto.impl.GiftCertificateCreateDto;
 import com.epam.esm.dto.impl.GiftCertificateUpdateDto;
+import com.epam.esm.dto.impl.TagCreateDto;
+import com.epam.esm.dto.impl.TagDto;
+import com.epam.esm.entity.Tag;
 import com.epam.esm.enums.ErrorCodes;
 import com.epam.esm.exceptions.ValidationException;
 import com.epam.esm.utils.BaseUtils;
@@ -9,7 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 
+import static com.epam.esm.mapper.GiftCertificateColumn.*;
 import static java.lang.String.format;
 
 @Component
@@ -24,22 +30,46 @@ public class GiftCertificateValidator implements BaseValidator<GiftCertificateCr
     private static final int DURATION_MIN_VALUE = 1;
     private final BaseUtils baseUtils;
 
+    private final TagValidator tagValidator;
+
     @Autowired
-    public GiftCertificateValidator(BaseUtils baseUtils) {
+    public GiftCertificateValidator(BaseUtils baseUtils, TagValidator tagValidator) {
         this.baseUtils = baseUtils;
+        this.tagValidator = tagValidator;
     }
 
     @Override
     public boolean isCreateDtoValid(GiftCertificateCreateDto createDto) {
-        return isNameValid(createDto.getName()) &&
-                isDescriptionValid(createDto.getDescription()) &&
-                isDurationValid(createDto.getDuration()) &&
-                isPriceValid(createDto.getPrice());
+        return isNameValid(createDto.getName()) && isDescriptionValid(createDto.getDescription()) && isDurationValid(createDto.getDuration()) && isPriceValid(createDto.getPrice());
     }
 
     @Override
-    public boolean isUpdateDtoValid(GiftCertificateUpdateDto updateDto) {
-        return BaseValidator.super.isUpdateDtoValid(updateDto);
+    public boolean isUpdateDtoValid(GiftCertificateUpdateDto updateDto, Map<String, String> updateFieldsMap) {
+        if (!baseUtils.isEmpty(updateDto.getName())) {
+            updateFieldsMap.put(NAME, updateDto.getName());
+        }
+        if (!baseUtils.isEmpty(updateDto.getDescription())) {
+            updateFieldsMap.put(DESCRIPTION, updateDto.getDescription());
+        }
+        if (!baseUtils.isEmpty(updateDto.getDuration())) {
+            updateFieldsMap.put(DURATION, updateDto.getDuration().toString());
+        }
+        if (!baseUtils.isEmpty(updateDto.getPrice())) {
+            updateFieldsMap.put(PRICE, updateDto.getPrice().toString());
+        }
+        if (!baseUtils.isEmpty(updateDto.getId())) {
+            updateFieldsMap.put(ID, updateDto.getId().toString());
+        }
+        return updateFieldsMap.size()>0 || updateDto.getTagList().size()>0;
+    }
+
+    public void validateListOfTags(List<TagCreateDto> tags) {
+        if (baseUtils.isEmpty(tags)) {
+            return;
+        }
+        for (TagCreateDto tag : tags) {
+            tagValidator.isCreateDtoValid(tag);
+        }
     }
 
     public boolean isNameValid(String name) {

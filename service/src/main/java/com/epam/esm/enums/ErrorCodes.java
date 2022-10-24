@@ -4,6 +4,7 @@ public enum ErrorCodes {
 
     ERROR_MESSAGE_NOT_FOUND("ERROR_MESSAGE_NOT_FOUND", "Error message with code %s not found"),
     OBJECT_ALREADY_EXIST("OBJECT_ALREADY_EXIST", "%s by this %s already exist"),
+    OBJECT_NOT_FOUND_BY_FIELD("OBJECT_ALREADY_EXIST", "%s by this %s not found"),
     OBJECT_NOT_FOUND("OBJECT_NOT_FOUND", "%s not found"),
     OBJECT_NOT_FOUND_ID("OBJECT_NOT_FOUND_ID", "%s with provided id: %s not found"),
     OBJECT_IS_DELETED("OBJECT_IS_DELETED", "%s with provided id: %s is deleted"),

@@ -23,7 +23,7 @@ public abstract class AbstractCrudService<T extends Identifiable, D extends Gene
         return null;
     }
 
-    public ResponseEntity<D> update(@NotNull UP dto) {
+    public ResponseEntity<Boolean> update(@NotNull UP dto) {
         return null;
     }
 

@@ -23,7 +23,7 @@ public interface GenericCrudService<T extends Identifiable, D extends GenericDto
 
     ResponseEntity<GenericDto> create(@NotNull CR dto);
 
-    default ResponseEntity<D> update(@NotNull UP dto) {
+    default ResponseEntity<Boolean> update(@NotNull UP dto) {
         return null;
     }
 
