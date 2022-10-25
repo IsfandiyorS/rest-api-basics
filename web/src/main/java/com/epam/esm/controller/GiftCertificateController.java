@@ -1,18 +1,18 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.criteria.impl.GiftCertificateCriteria;
-import com.epam.esm.dto.impl.*;
-import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.entity.Tag;
-import com.epam.esm.exceptions.DaoException;
+import com.epam.esm.dto.impl.GiftCertificateCreateDto;
+import com.epam.esm.dto.impl.GiftCertificateDto;
+import com.epam.esm.dto.impl.GiftCertificateUpdateDto;
+import com.epam.esm.dto.impl.TagCreateDto;
 import com.epam.esm.service.impl.GiftCertificateServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/gift")
@@ -66,7 +66,7 @@ public class GiftCertificateController {
     }
 
     @GetMapping("/filter")
-    public List<GiftCertificate> giftCertificatesByParameter(@RequestBody GiftCertificateCriteria criteria) {
+    public List<GiftCertificateDto> giftCertificatesByParameter(@RequestParam MultiValueMap<String, String> criteria) {
         return giftCertificateService.doFilter(criteria);
     }
 }

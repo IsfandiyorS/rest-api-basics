@@ -17,9 +17,11 @@ import com.epam.esm.validation.GiftCertificateValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MultiValueMap;
 
 import java.util.*;
 
+import static com.epam.esm.criteria.FilterParameters.*;
 import static java.lang.String.format;
 
 @Service
@@ -153,8 +155,17 @@ public class GiftCertificateServiceImpl extends AbstractCrudService<GiftCertific
     }
 
     @Override
-    public List<GiftCertificate> doFilter(GiftCertificateCriteria criteria) {
-        return null;
+    public List<GiftCertificateDto> doFilter(GiftCertificateCriteria criteria) {
+//        Map<String, String> map = new HashMap<>();
+//        map.put(NAME, criteria.getSearchByName());
+//        map.put(TAG_NAME, criteria.getSearchByTagName());
+//        map.put(PART_OF_NAME, criteria.getSearchByPartOfName());
+//        map.put(PART_OF_DESCRIPTION, criteria.getSearchByPartOfDescription());
+//        map.put(PART_OF_TAG_NAME, criteria.getSearchByPartOfTagName());
+//        map.put(SORT_BY_NAME, criteria.getSortByName());
+//        map.put(SORT_BY_CREATE_DATE, criteria.getSortByCreatedDate());
+//        map.put(SORT_BY_TAG_NAME, criteria.getSortByTagName());
+        return giftCertificationDao.getGiftCertificateByFilteringParameters(null);
     }
 
     private void checkTagsForAvailabilityAndSave(List<TagDto> requestTags, List<TagDto> allCreatedNewTags, Long giftCertificateId) {
@@ -197,4 +208,32 @@ public class GiftCertificateServiceImpl extends AbstractCrudService<GiftCertific
         return tagIdList;
     }
 
+    public List<GiftCertificateDto> doFilter(MultiValueMap<String, String> requestParams) {
+//        Map<String, String> map = new HashMap<>();
+//        map.put(NAME, criteria.getSearchByName());
+//        map.put(TAG_NAME, criteria.getSearchByTagName());
+//        map.put(PART_OF_NAME, criteria.getSearchByPartOfName());
+//        map.put(PART_OF_DESCRIPTION, criteria.getSearchByPartOfDescription());
+//        map.put(PART_OF_TAG_NAME, criteria.getSearchByPartOfTagName());
+//        map.put(SORT_BY_NAME, criteria.getSortByName());
+//        map.put(SORT_BY_CREATE_DATE, criteria.getSortByCreatedDate());
+//        map.put(SORT_BY_TAG_NAME, criteria.getSortByTagName());
+        Map<String, String> map = new HashMap<>();
+        map.put(NAME, getSingleRequestParameter(requestParams, NAME));
+        map.put(TAG_NAME, getSingleRequestParameter(requestParams, TAG_NAME));
+        map.put(PART_OF_NAME, getSingleRequestParameter(requestParams, PART_OF_NAME));
+        map.put(PART_OF_DESCRIPTION, getSingleRequestParameter(requestParams, PART_OF_DESCRIPTION));
+        map.put(PART_OF_TAG_NAME, getSingleRequestParameter(requestParams, PART_OF_TAG_NAME));
+        map.put(SORT_BY_NAME, getSingleRequestParameter(requestParams, SORT_BY_NAME));
+        map.put(SORT_BY_CREATE_DATE, getSingleRequestParameter(requestParams, SORT_BY_CREATE_DATE));
+        map.put(SORT_BY_TAG_NAME, getSingleRequestParameter(requestParams, SORT_BY_TAG_NAME));
+        return giftCertificationDao.getGiftCertificateByFilteringParameters(map);
+    }
+    protected String getSingleRequestParameter(MultiValueMap<String, String> requestParams, String parameter) {
+        if (requestParams.containsKey(parameter)) {
+            return requestParams.get(parameter).get(0);
+        } else {
+            return null;
+        }
+    }
 }

@@ -2,7 +2,6 @@ package com.epam.esm.dao;
 
 import com.epam.esm.dto.impl.TagCreateDto;
 import com.epam.esm.dto.impl.TagDto;
-import com.epam.esm.dto.impl.TagUpdateDto;
 
 import java.util.List;
 import java.util.Optional;

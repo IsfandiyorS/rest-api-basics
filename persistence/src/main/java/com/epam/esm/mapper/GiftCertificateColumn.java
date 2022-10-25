@@ -1,7 +1,5 @@
 package com.epam.esm.mapper;
 
-import javax.swing.plaf.PanelUI;
-
 public final class GiftCertificateColumn {
     public static final String GIFT_CERTIFICATION_TABLE = "gift_certificate";
     public static final String ID = "id";

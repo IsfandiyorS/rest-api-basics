@@ -21,32 +21,12 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <spring.version>5.3.23</spring.version>
     <junit.version>4.13.2</junit.version>
+    <spring.test.version>5.3.10</spring.test.version>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
   </properties>
 
   <dependencies>
-<!--    <dependency>-->
-<!--      <groupId>junit</groupId>-->
-<!--      <artifactId>junit</artifactId>-->
-<!--      <version>${junit.version}</version>-->
-<!--      <scope>test</scope>-->
-<!--    </dependency>-->
-
-    <!-- Spring context -->
-<!--    <dependency>-->
-<!--      <groupId>org.springframework</groupId>-->
-<!--      <artifactId>spring-context</artifactId>-->
-<!--      <version>${spring.version}</version>-->
-<!--    </dependency>-->
-
-    <!-- Spring Web MVC -->
-<!--    <dependency>-->
-<!--      <groupId>org.springframework</groupId>-->
-<!--      <artifactId>spring-webmvc</artifactId>-->
-<!--      <version>${spring.version}</version>-->
-<!--    </dependency>-->
-
     <!-- Spring Core -->
     <dependency>
       <groupId>org.springframework</groupId>
@@ -88,6 +68,14 @@
         <version>${spring.version}</version>
       </dependency>
 
+      <!-- Spring Web -->
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-web</artifactId>
+        <version>${spring.version}</version>
+        <scope>compile</scope>
+      </dependency>
+
       <!-- Spring Web MVC -->
       <dependency>
         <groupId>org.springframework</groupId>
@@ -101,6 +89,21 @@
         <artifactId>lombok</artifactId>
         <version>1.18.24</version>
         <scope>provided</scope>
+      </dependency>
+
+      <!-- junit-jupiter-api -->
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-api</artifactId>
+        <version>5.9.1</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-test</artifactId>
+        <version>${spring.test.version}</version>
+        <scope>test</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>

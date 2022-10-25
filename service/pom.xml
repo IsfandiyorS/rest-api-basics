@@ -28,6 +28,13 @@
         </dependency>
 
         <dependency>
+            <groupId>com.epam.esm</groupId>
+            <artifactId>persistence</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
@@ -38,13 +45,6 @@
             <artifactId>lombok</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.epam.esm</groupId>
-            <artifactId>model</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-
         <!-- Spring context -->
         <dependency>
             <groupId>org.springframework</groupId>
@@ -53,7 +53,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-            <version>5.3.23</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

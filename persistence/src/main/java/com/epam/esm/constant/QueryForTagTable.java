@@ -1,7 +1,5 @@
 package com.epam.esm.constant;
 
-import java.security.PublicKey;
-
 public final class QueryForTagTable {
     public static final String INSERT_TAG_QUERY = "INSERT INTO tag(name) values(?)";
     public static final String DELETE_TAG_QUERY = "DELETE FROM tag WHERE id = ?";

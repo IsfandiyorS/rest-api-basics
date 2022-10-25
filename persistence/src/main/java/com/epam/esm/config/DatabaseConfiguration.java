@@ -1,4 +1,4 @@
-package com.epam.esm.dao.config;
+package com.epam.esm.config;
 
 
 import com.zaxxer.hikari.HikariConfig;

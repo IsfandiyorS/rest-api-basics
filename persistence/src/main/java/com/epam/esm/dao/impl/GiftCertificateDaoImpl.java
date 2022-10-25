@@ -5,22 +5,21 @@ import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.dto.impl.GiftCertificateCreateDto;
 import com.epam.esm.dto.impl.GiftCertificateDto;
-import com.epam.esm.dto.impl.TagCreateDto;
 import com.epam.esm.dto.impl.TagDto;
-import com.epam.esm.entity.Tag;
-import com.epam.esm.exceptions.DaoException;
 import com.epam.esm.mapper.GiftCertificateDtoRowMapper;
 import com.epam.esm.mapper.GiftCertificateRowMapper;
 import com.epam.esm.mapper.TagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 import static com.epam.esm.constant.QueryForGiftCertificate.*;
 import static com.epam.esm.constant.QueryForTagTable.ATTACH_TAG_TO_GIFT;
@@ -100,28 +99,9 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
             });
     }
 
-//    @Override
-//    public void attachTagsToGiftCertificate(Long giftCertificateId, List<TagCreateDto> tags) {
-//        List<Long> tagIds = getTagsIds(tags);
-//        try {
-//            tagIds.stream().forEach(tagId -> {
-//                executeUpdateQuery(ADD_TAGS_ASSOCIATION_QUERY, certificateId, tagId);
-//            });
-//        } catch (DataAccessException e) {
-//            throw new DaoException(NO_ENTITY_WITH_ID);
-//        }
-//    }
-
-//    private List<Long> getTagsIds(List<Tag> tags) {
-//        List<Long> tagIds = new ArrayList();
-//        tags.stream().forEach(tag -> {
-//            String tagName = tag.getName();
-//            Tag tagWithId = null;
-//            Optional<TagDto> optionalTagDto = tagDao.findByName(tagName);
-//            if (optionalTagDto.)
-//
-//            tagIds.add(tagWithId.getId());
-//        });
-//        return tagIds;
-//    }
+    @Override
+    public List<GiftCertificateDto> getGiftCertificateByFilteringParameters(Map<String, String> criteria) {
+        String query = queryCreator.createGetQuery(criteria, "gift_certificate");
+        return jdbcTemplate.query(query, new GiftCertificateDtoRowMapper());
+    }
 }
