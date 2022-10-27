@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public interface BaseValidator<CR extends CrudDto, UP extends CrudDto> {
 
-    boolean isCreateDtoValid(CR createDto);
+    void isCreateDtoValid(CR createDto);
 
     default boolean isUpdateDtoValid(UP updateDto, Map<String , String> updateFieldsMap){return false;};
 

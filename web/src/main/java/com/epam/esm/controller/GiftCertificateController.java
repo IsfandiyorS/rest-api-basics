@@ -1,6 +1,5 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.criteria.impl.GiftCertificateCriteria;
 import com.epam.esm.dto.impl.GiftCertificateCreateDto;
 import com.epam.esm.dto.impl.GiftCertificateDto;
 import com.epam.esm.dto.impl.GiftCertificateUpdateDto;
@@ -12,7 +11,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/gift")
@@ -30,43 +28,43 @@ public class GiftCertificateController {
         return ResponseEntity.ok(giftCertificateService.get(id));
     }
 
-    @GetMapping("/getAll")
+    @GetMapping("/get_all")
     public ResponseEntity<?> getAll() {
-        return giftCertificateService.getAll();
+        return ResponseEntity.ok(giftCertificateService.getAll());
     }
 
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestBody GiftCertificateCreateDto dto) {
-        return giftCertificateService.create(dto);
+        return ResponseEntity.ok(giftCertificateService.create(dto));
     }
 
     @PutMapping("/update")
     public ResponseEntity<?> update(@RequestBody GiftCertificateUpdateDto updateDto) {
-        return giftCertificateService.update(updateDto);
+        return ResponseEntity.ok(giftCertificateService.update(updateDto));
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") Long id) {
-        return giftCertificateService.delete(id);
+        return ResponseEntity.ok(giftCertificateService.delete(id));
     }
 
-    @GetMapping("/{id}/tags")
+    @GetMapping("/gift_tags_by_certificate_id/{id}")
     public ResponseEntity<?> getAttachedTagsWithGiftCertificateId(@PathVariable("id") Long id) {
-        return giftCertificateService.getAttachedTagsWithGiftCertificateId(id);
+        return ResponseEntity.ok(giftCertificateService.getAttachedTagsWithGiftCertificateId(id));
     }
 
-    @PostMapping("/{id}/tags")
+    @PostMapping("/attach_tags_by_certificate_id/{id}")
     public ResponseEntity<?> attachTagsToGiftCertificate(@RequestBody List<TagCreateDto> tags, @PathVariable("id") Long id) {
-        return giftCertificateService.attachTagsToGiftCertificate(id, tags);
+        return ResponseEntity.ok(giftCertificateService.attachTagsToGiftCertificate(id, tags));
     }
 
-    @DeleteMapping("/{id}/tags")
+    @DeleteMapping("/delete_tags_by_certificate_id/{id}")
     public ResponseEntity<?> deleteAssociatedTags(@RequestBody List<TagCreateDto> tags, @PathVariable("id") Long id) {
-        return giftCertificateService.deleteAssociatedTags(id, tags);
+        return ResponseEntity.ok(giftCertificateService.deleteAssociatedTags(id, tags));
     }
 
     @GetMapping("/filter")
-    public List<GiftCertificateDto> giftCertificatesByParameter(@RequestParam MultiValueMap<String, String> criteria) {
-        return giftCertificateService.doFilter(criteria);
+    public ResponseEntity<List<GiftCertificateDto>> giftCertificatesByParameter(@RequestParam MultiValueMap<String, String> criteria) {
+        return ResponseEntity.ok(giftCertificateService.doFilter(criteria));
     }
 }

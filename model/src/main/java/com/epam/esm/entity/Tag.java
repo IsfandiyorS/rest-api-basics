@@ -4,10 +4,14 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 public class Tag extends Identifiable {
-
     private String name;
 
     public Tag() {
+    }
+
+    public Tag(Long id, String name) {
+        super(id);
+        this.name = name;
     }
 
     public Tag(String name) {

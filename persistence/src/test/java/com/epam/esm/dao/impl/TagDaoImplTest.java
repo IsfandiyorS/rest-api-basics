@@ -1,8 +1,7 @@
 package com.epam.esm.dao.impl;
 
 import com.epam.esm.config.DatabaseConfigurationTest;
-import com.epam.esm.dto.impl.TagCreateDto;
-import com.epam.esm.dto.impl.TagDto;
+import com.epam.esm.entity.Tag;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,8 +13,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ContextConfiguration(classes = DatabaseConfigurationTest.class)
 @ActiveProfiles("test")
@@ -24,64 +22,69 @@ class TagDaoImplTest {
 
     @Autowired
     private TagDaoImpl tagDao;
-    private static List<TagCreateDto> tagCreateDtoList;
-    private static List<TagDto> tagDtoList;
+    private static List<Tag> tagList;
 
     @BeforeAll
     static void setUp() {
-        tagCreateDtoList = List.of(
-                new TagCreateDto("tag1"),
-                new TagCreateDto("tag2"),
-                new TagCreateDto("tag3"),
-                new TagCreateDto("tag4")
-        );
-
-        tagDtoList = List.of(
-                new TagDto(1L,"tag1"),
-                new TagDto(2L, "tag2"),
-                new TagDto(3L, "tag3"),
-                new TagDto(4L, "tag4")
+        tagList = List.of(
+                new Tag(1L, "tag1"),
+                new Tag(2L, "tag2"),
+                new Tag(3L, "tag3"),
+                new Tag(4L, "tag4")
         );
     }
 
     @Test
     void save() {
-        TagCreateDto dto = new TagCreateDto("tag5");
+        Tag tag = new Tag("tag5");
+        assertEquals(tagDao.save(tag), 5);
     }
 
     @Test
     void removeById() {
+        tagDao.removeById(1L);
+        assertTrue(tagDao.findByName(tagList.get(0).getName()).isEmpty());
     }
 
     @Test
     void findById() {
+        Tag tag = tagList.get(1);
+        assertEquals(tag.getName(), tagDao.findById(tag.getId()).get().getName());
     }
 
     @Test
     void getAll() {
+        List<Tag> actual = tagDao.getAll();
+        assertEquals(tagList.size(), actual.size());
     }
 
     @Test
     void findTagByNameAlreadyExisted() {
-        Optional<TagDto> optionalTag = tagDao.findByName(tagCreateDtoList.get(0).getName());
-        assertEquals(optionalTag.get().getName(), tagCreateDtoList.get(0).getName());
+        Optional<Tag> optionalTag = tagDao.findByName(tagList.get(0).getName());
+        assertEquals(optionalTag.get().getName(), tagList.get(0).getName());
     }
 
     @Test
     void findTagByNameNotExisted() {
-        Optional<TagDto> optionalTag = tagDao.findByName("tag5");
-        assertTrue(optionalTag.isEmpty());
+        Optional<Tag> optionalTag = tagDao.findByName(tagList.get(0).getName());
+        assertFalse(optionalTag.isEmpty());
     }
 
     @Test
-    void getAttachedTagsWithGiftCertificateId() {
+    void testGetAttachedTagsWithGiftCertificateIdToEmptyList() {
+        List<Tag> tagDaoList = tagDao.getAttachedTagsWithGiftCertificateId(4L);
+        assertTrue(tagDaoList.isEmpty());
     }
 
     @Test
-    void attachTagToGiftCertificate() {
+    void testGetAttachedTagsWithGiftCertificateIdToNotEmptyList() {
+        List<Tag> tagDaoList = tagDao.getAttachedTagsWithGiftCertificateId(1L);
+        assertFalse(tagDaoList.isEmpty());
     }
 
     @Test
     void checkForAvailabilityOfTagIdInRelatedTable() {
+        boolean isAvailable = tagDao.checkForAvailabilityOfTagIdInRelatedTable(2L, 1L);
+        assertTrue(isAvailable);
     }
 }

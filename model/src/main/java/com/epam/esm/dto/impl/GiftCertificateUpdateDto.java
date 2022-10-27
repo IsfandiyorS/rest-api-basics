@@ -12,7 +12,7 @@ public class GiftCertificateUpdateDto extends GenericCrudDto {
     private BigDecimal price;
     private Integer duration;
 
-    private List<TagDto> tagList;
+    private List<TagCreateDto> tagList;
 
     public GiftCertificateUpdateDto() {
     }
@@ -65,11 +65,11 @@ public class GiftCertificateUpdateDto extends GenericCrudDto {
         this.duration = duration;
     }
 
-    public List<TagDto> getTagList() {
+    public List<TagCreateDto> getTagList() {
         return tagList;
     }
 
-    public void setTagList(List<TagDto> tagList) {
+    public void setTagList(List<TagCreateDto> tagList) {
         this.tagList = tagList;
     }
 }

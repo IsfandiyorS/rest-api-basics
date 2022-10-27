@@ -23,6 +23,14 @@ public class GiftCertificateCreateDto extends GenericCrudDto {
         this.duration = duration;
     }
 
+    public GiftCertificateCreateDto(String name, String description, BigDecimal price, Integer duration, List<TagCreateDto> tagCreateDtoList) {
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.duration = duration;
+        this.tagCreateDtoList = tagCreateDtoList;
+    }
+
     public String getName() {
         return name;
     }

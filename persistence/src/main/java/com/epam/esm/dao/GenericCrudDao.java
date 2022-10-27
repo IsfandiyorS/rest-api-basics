@@ -2,20 +2,21 @@ package com.epam.esm.dao;
 
 import com.epam.esm.dto.CrudDto;
 import com.epam.esm.dto.GenericDto;
+import com.epam.esm.entity.BaseDomain;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public interface GenericCrudDao<D extends GenericDto, CR extends CrudDto> extends GenericDao {
-    Long save(CR item);
+public interface GenericCrudDao<T extends BaseDomain> extends GenericDao {
+    Long save(T item);
 
     default void update(Map<String, String> item) {
     }
 
     void removeById(Long id);
 
-    Optional<D> findById(Long id);
+    Optional<T> findById(Long id);
 
-    List<D> getAll();
+    List<T> getAll();
 }

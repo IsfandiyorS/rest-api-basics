@@ -79,7 +79,7 @@ public class QueryCreator {
         } else {
             query.append(" WHERE ");
         }
-        query.append(partParameter).append("='").append(value).append('\'');
+        query.append("gc.").append(partParameter).append("='").append(value).append('\'');
     }
 
     private void addPartParameter(StringBuilder query, String partParameter, String value) {
@@ -88,7 +88,7 @@ public class QueryCreator {
         } else {
             query.append(" WHERE ");
         }
-        query.append(partParameter).append(" LIKE '%").append(value).append("%'");
+        query.append("gc.").append(partParameter).append(" LIKE '%").append(value).append("%'");
     }
 
     private void addSortParameter(StringBuilder query, String sortParameter, String value) {

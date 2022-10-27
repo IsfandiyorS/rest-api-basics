@@ -15,6 +15,9 @@ public class TagConverter implements GenericConverter<Tag, TagCreateDto, TagDto>
 
     @Override
     public TagDto convertEntityToDto(Tag entity) {
-        return new TagDto(entity.getId(), entity.getName());
+        TagDto tag = new TagDto();
+        tag.setId(entity.getId());
+        tag.setName(entity.getName());
+        return tag;
     }
 }

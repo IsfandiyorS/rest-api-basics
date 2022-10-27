@@ -1,31 +1,31 @@
 package com.epam.esm.service;
 
-import com.epam.esm.entity.Identifiable;
 import com.epam.esm.dto.CrudDto;
 import com.epam.esm.dto.GenericDto;
-import org.springframework.http.ResponseEntity;
+import com.epam.esm.entity.Identifiable;
 
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Optional;
 
 /**
- *
  * @param <T>
  * @param <D>
  * @param <CR>
  * @param <UP>
  */
 public interface GenericCrudService<T extends Identifiable, D extends GenericDto, CR extends CrudDto, UP extends CrudDto, ID extends Serializable> extends AbstractService {
-    ResponseEntity<D> get(ID id);
+    D get(ID id);
 
-    ResponseEntity<List<D>> getAll();
+    List<D> getAll();
 
-    ResponseEntity<GenericDto> create(@NotNull CR dto);
+    GenericDto create(CR dto);
 
-    default ResponseEntity<Boolean> update(@NotNull UP dto) {
+    default Boolean update(UP dto) {
         return null;
     }
 
-    ResponseEntity<Boolean> delete(@NotNull ID id);
+    Boolean delete(ID id);
+
+    void validate(Optional<T> entity, Long id, String entityName);
 }

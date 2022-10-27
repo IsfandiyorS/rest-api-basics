@@ -3,8 +3,6 @@ package com.epam.esm.validation;
 import com.epam.esm.dto.impl.GiftCertificateCreateDto;
 import com.epam.esm.dto.impl.GiftCertificateUpdateDto;
 import com.epam.esm.dto.impl.TagCreateDto;
-import com.epam.esm.dto.impl.TagDto;
-import com.epam.esm.entity.Tag;
 import com.epam.esm.enums.ErrorCodes;
 import com.epam.esm.exceptions.ValidationException;
 import com.epam.esm.utils.BaseUtils;
@@ -39,8 +37,10 @@ public class GiftCertificateValidator implements BaseValidator<GiftCertificateCr
     }
 
     @Override
-    public boolean isCreateDtoValid(GiftCertificateCreateDto createDto) {
-        return isNameValid(createDto.getName()) && isDescriptionValid(createDto.getDescription()) && isDurationValid(createDto.getDuration()) && isPriceValid(createDto.getPrice());
+    public void isCreateDtoValid(GiftCertificateCreateDto createDto) {
+        if (isNameValid(createDto.getName()) && isDescriptionValid(createDto.getDescription()) && isDurationValid(createDto.getDuration())) {
+            isPriceValid(createDto.getPrice());
+        }
     }
 
     @Override
@@ -108,5 +108,22 @@ public class GiftCertificateValidator implements BaseValidator<GiftCertificateCr
         }
         return true;
     }
+
+//    public void validateFilterSortParams(Map<String, String> filterMap, MultiValueMap<String, String> requestParams, String param) {
+//        String requestParameter = getSingleRequestParameter(requestParams, param);
+//        if (requestParameter!=null && (!requestParameter.equalsIgnoreCase("asc") || !requestParameter.equalsIgnoreCase("desc"))){
+//            throw new ObjectNotFoundDaoException(format(ErrorCodes.FIELD_IN_CORRECT.message, param));
+//        } else {
+//            filterMap.put(param, getSingleRequestParameter(requestParams, param));
+//        }
+//    }
+//
+//    protected String getSingleRequestParameter(MultiValueMap<String, String> requestParams, String parameter) {
+//        if (requestParams.containsKey(parameter)) {
+//            return requestParams.get(parameter).get(0);
+//        } else {
+//            return null;
+//        }
+//    }
 
 }

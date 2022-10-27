@@ -4,6 +4,7 @@ import com.epam.esm.constant.QueryForTagTable;
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.dto.impl.TagCreateDto;
 import com.epam.esm.dto.impl.TagDto;
+import com.epam.esm.entity.Tag;
 import com.epam.esm.mapper.TagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -31,7 +32,7 @@ public class TagDaoImpl implements TagDao {
     }
 
     @Override
-    public Long save(TagCreateDto tag) {
+    public Long save(Tag tag) {
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(
@@ -51,22 +52,22 @@ public class TagDaoImpl implements TagDao {
     }
 
     @Override
-    public Optional<TagDto> findById(Long id) {
+    public Optional<Tag> findById(Long id) {
         return jdbcTemplate.query(GET_TAG_BY_ID, tagMapper, id).stream().findAny();
     }
 
     @Override
-    public List<TagDto> getAll() {
+    public List<Tag> getAll() {
         return jdbcTemplate.query(GET_ALL_TAG, tagMapper);
     }
 
     @Override
-    public Optional<TagDto> findByName(String name) {
+    public Optional<Tag> findByName(String name) {
         return jdbcTemplate.query(GET_TAG_BY_NAME, tagMapper, name).stream().findAny();
     }
 
     @Override
-    public List<TagDto> getAttachedTagsWithGiftCertificateId(Long giftCertificateId) {
+    public List<Tag> getAttachedTagsWithGiftCertificateId(Long giftCertificateId) {
         return jdbcTemplate.query(GET_ATTACHED_TAGS_BY_GIFT_CERTIFICATE_ID, tagMapper, giftCertificateId);
     }
 

@@ -2,14 +2,14 @@ package com.epam.esm.dao.impl;
 
 import com.epam.esm.creator.QueryCreator;
 import com.epam.esm.dao.GiftCertificateDao;
-import com.epam.esm.dao.TagDao;
-import com.epam.esm.dto.impl.GiftCertificateCreateDto;
-import com.epam.esm.dto.impl.GiftCertificateDto;
-import com.epam.esm.dto.impl.TagDto;
+import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.Tag;
+import com.epam.esm.exceptions.DaoException;
 import com.epam.esm.mapper.GiftCertificateDtoRowMapper;
 import com.epam.esm.mapper.GiftCertificateRowMapper;
 import com.epam.esm.mapper.TagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -32,18 +32,16 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
     private final JdbcTemplate jdbcTemplate;
     private final GiftCertificateRowMapper giftCertificateRowMapper;
     private final QueryCreator queryCreator;
-    private final TagDao tagDao;
 
     @Autowired
-    public GiftCertificateDaoImpl(JdbcTemplate jdbcTemplate, GiftCertificateRowMapper giftCertificateRowMapper, QueryCreator queryCreator, TagDao tagDao) {
+    public GiftCertificateDaoImpl(JdbcTemplate jdbcTemplate, GiftCertificateRowMapper giftCertificateRowMapper, QueryCreator queryCreator) {
         this.jdbcTemplate = jdbcTemplate;
         this.giftCertificateRowMapper = giftCertificateRowMapper;
         this.queryCreator = queryCreator;
-        this.tagDao = tagDao;
     }
 
     @Override
-    public Long save(GiftCertificateCreateDto giftCertificate) {
+    public Long save(GiftCertificate giftCertificate) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(
                 connection -> {
@@ -72,13 +70,14 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
     }
 
     @Override
-    public Optional<GiftCertificateDto> findById(Long id) {
-        return Objects.requireNonNull(jdbcTemplate.query(GET_GIFT_BY_ID, giftCertificateRowMapper, id)).stream().findAny();
+    public Optional<GiftCertificate> findById(Long id) {
+        return jdbcTemplate.query(GET_GIFT_BY_ID, giftCertificateRowMapper, id).stream().findAny();
     }
 
     @Override
-    public List<GiftCertificateDto> getAll() {
-        return jdbcTemplate.query(GET_ALL_GIFT, new GiftCertificateDtoRowMapper());
+    public List<GiftCertificate> getAll() {
+        List<GiftCertificate> query = jdbcTemplate.query(GET_ALL_GIFT, new GiftCertificateDtoRowMapper());
+        return query;
     }
 
     @Override
@@ -88,7 +87,7 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
     }
 
     @Override
-    public List<TagDto> getAttachedTagsWithGiftCertificateId(Long giftCertificateId) {
+    public List<Tag> getAttachedTagsWithGiftCertificateId(Long giftCertificateId) {
         return jdbcTemplate.query(GET_ASSOCIATED_TAGS_QUERY, new TagMapper(), giftCertificateId);
     }
 
@@ -100,8 +99,13 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
     }
 
     @Override
-    public List<GiftCertificateDto> getGiftCertificateByFilteringParameters(Map<String, String> criteria) {
+    public List<GiftCertificate> getGiftCertificateByFilteringParameters(Map<String, String> criteria) {
         String query = queryCreator.createGetQuery(criteria, "gift_certificate");
-        return jdbcTemplate.query(query, new GiftCertificateDtoRowMapper());
+        try{
+            return jdbcTemplate.query(query, new GiftCertificateDtoRowMapper());
+        } catch (DataAccessException e){
+            throw new DaoException("Objects with not found by this");
+        }
+
     }
 }

@@ -23,7 +23,7 @@ public class TagValidator implements BaseValidator<TagCreateDto, TagUpdateDto>{
     }
 
     @Override
-    public boolean isCreateDtoValid(TagCreateDto createDto) {
+    public void isCreateDtoValid(TagCreateDto createDto) {
         if (baseUtils.isEmpty(createDto.getName())){
             throw new ValidationException(format(ErrorCodes.OBJECT_SHOULD_BE.message, "Tag name", "written"));
         }
@@ -32,7 +32,6 @@ public class TagValidator implements BaseValidator<TagCreateDto, TagUpdateDto>{
             throw new ValidationException(format(ErrorCodes.FIELD_LENGTH_SHOULD_BE.message, "Tag name",
                     NAME_MIN_LENGTH, NAME_MAX_LENGTH));
         }
-        return true;
     }
 
 }

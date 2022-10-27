@@ -19,21 +19,22 @@ public class TagController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getTagById(@PathVariable("id") Long id) {
-        return tagService.get(id);
+        return ResponseEntity.ok(tagService.get(id));
     }
 
-    @GetMapping("/getAll")
+    //fixme get_all remove
+    @GetMapping("/get_all")
     public ResponseEntity<?> getAll() {
-        return tagService.getAll();
+        return ResponseEntity.ok(tagService.getAll());
     }
 
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestBody TagCreateDto dto) {
-        return tagService.create(dto);
+        return ResponseEntity.ok(tagService.create(dto));
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") Long id) {
-        return tagService.delete(id);
+        return ResponseEntity.ok(tagService.delete(id));
     }
 }

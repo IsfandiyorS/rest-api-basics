@@ -8,7 +8,8 @@ public final class QueryForGiftCertificate {
         LEFT JOIN gift_certificate_tag gct ON  gc.id=gct.gift_certificate_id
         LEFT JOIN tag t ON gct.tag_id=t.id WHERE gc.id=?;
         """;
-    public static final String INSERT_GIFT_CERTIFICATE_QUERY = "INSERT INTO gift_certificate(name, description, price, duration) VALUES(?,?,?,?)";
+    public static final String INSERT_GIFT_CERTIFICATE_QUERY = """
+            INSERT INTO gift_certificate(name, description, price, duration) VALUES(?,?,?,?)""";
 
     public static final String DELETE_GIFT_BY_ID = "DELETE FROM gift_certificate WHERE id = ?";
 
