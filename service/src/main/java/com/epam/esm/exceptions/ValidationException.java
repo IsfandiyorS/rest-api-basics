@@ -1,6 +1,12 @@
 package com.epam.esm.exceptions;
 
-public class ValidationException extends GenericException{
+/**
+ * Class {@code ValidationException} used in the case of which given parameters of object is not correct.
+ *
+ * @author Sultonov Isfandiyor
+ * @version 1.0
+ */
+public class ValidationException extends Exception{
 
     public ValidationException() {
         super();

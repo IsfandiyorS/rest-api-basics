@@ -33,6 +33,7 @@ public class QueryCreator {
         return "UPDATE " + tableName + " SET " + joiner + " WHERE id=" + fields.get("id");
     }
 
+    // fixme change all if to methods
     /**
      * Method for creating a database query from {@link Map} to get entities.
      *
@@ -40,63 +41,77 @@ public class QueryCreator {
      * @param tableName name of the table where the update will take place
      * @return generated string query
      */
-    public String createGetQuery(Map<String, String> fields, String tableName) {
+    public String createGetQuery(Map<String, String> fields, String tableName, String tableNameAs) {
         StringBuilder query = new StringBuilder("SELECT gc.id, gc.name as gift_name, duration, description, price,create_date, last_update_date, t.id as tag_id, t.name as tag_name FROM " + tableName);
         if (Objects.equals(tableName, "gift_certificate")) {
             query.append(" gc LEFT JOIN gift_certificate_tag gct ON gc.id=gct.gift_certificate_id LEFT JOIN tag t ON gct.tag_id=t.id");
         }
         if (fields.get("tag_name") != null) {
-            addParameter(query, "tag_name", fields.get("tag_name"));
+            addParameter(query, "tag_name", fields.get("tag_name"), tableNameAs);
         }
         if (fields.get("name") != null) {
-            addParameter(query, "name", fields.get("name"));
+            addParameter(query, "name", fields.get("name"), tableNameAs);
         }
         if (fields.get("partOfTagName") != null) {
-            addPartParameter(query, "tag_name", fields.get("partOfTagName"));
+            addPartParameter(query, "tag_name", fields.get("partOfTagName"), tableNameAs);
         }
         if (fields.get("partOfName") != null) {
-            addPartParameter(query, "name", fields.get("partOfName"));
+            addPartParameter(query, "name", fields.get("partOfName"), tableNameAs);
         }
         if (fields.get("partOfDescription") != null) {
-            addPartParameter(query, "description", fields.get("partOfDescription"));
+            addPartParameter(query, "description", fields.get("partOfDescription"), tableNameAs);
         }
         if (fields.get("sortByTagName") != null) {
-            addSortParameter(query, "tag_name", fields.get("sortByTagName"));
+            addSortParameter(query, "tag_name", fields.get("sortByTagName"), tableNameAs);
         }
         if (fields.get("sortByName") != null) {
-            addSortParameter(query, "name", fields.get("sortByName"));
+            addSortParameter(query, "name", fields.get("sortByName"), tableNameAs);
         }
         if (fields.get("sortByCreateDate") != null) {
-            addSortParameter(query, "create_date", fields.get("sortByCreateDate"));
+            addSortParameter(query, "create_date", fields.get("sortByCreateDate"), tableNameAs);
         }
 
         return query.toString();
     }
 
-    private void addParameter(StringBuilder query, String partParameter, String value) {
+    public String createGetTagQuery(Map<String, String> fields, String tableName, String tableNameAs) {
+        StringBuilder query = new StringBuilder("SELECT * FROM " + tableName + " as t");
+        if (fields.get("tag_name") != null) {
+            addParameter(query, "name", fields.get("tag_name"), tableNameAs);
+        }
+        if (fields.get("partOfTagName") != null) {
+            addPartParameter(query, "name", fields.get("partOfTagName"), tableNameAs);
+        }
+        if (fields.get("sortByTagName") != null) {
+            addSortParameter(query, "name", fields.get("sortByTagName"), tableNameAs);
+        }
+
+        return query.toString();
+    }
+    private void addParameter(StringBuilder query, String partParameter, String value, String tableNameAs) {
         if (query.toString().contains("WHERE")) {
             query.append(" AND ");
         } else {
             query.append(" WHERE ");
         }
-        query.append("gc.").append(partParameter).append("='").append(value).append('\'');
+        query.append(tableNameAs).append(partParameter).append("='").append(value).append('\'');
     }
 
-    private void addPartParameter(StringBuilder query, String partParameter, String value) {
+    private void addPartParameter(StringBuilder query, String partParameter, String value, String tableNameAs) {
         if (query.toString().contains("WHERE")) {
             query.append(" AND ");
         } else {
             query.append(" WHERE ");
         }
-        query.append("gc.").append(partParameter).append(" LIKE '%").append(value).append("%'");
+        query.append(tableNameAs).append(partParameter).append(" LIKE '%").append(value).append("%'");
     }
 
-    private void addSortParameter(StringBuilder query, String sortParameter, String value) {
+    private void addSortParameter(StringBuilder query, String sortParameter, String value, String tableNameAs) {
         if (query.toString().contains("ORDER BY")) {
             query.append(", ");
         } else {
             query.append(" ORDER BY ");
         }
-        query.append("gc.").append(sortParameter).append(" ").append(value);
+        query.append(tableNameAs).append(sortParameter).append(" ").append(value);
     }
 }

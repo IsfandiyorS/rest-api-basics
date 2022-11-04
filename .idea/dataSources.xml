@@ -8,7 +8,14 @@
       <jdbc-url>jdbc:postgresql://localhost:5432/certification_db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="certification_db_test" uuid="40b129e3-c131-48a3-8d81-237186df1001">
+    <data-source source="LOCAL" name="certification_db_test@localhost" uuid="d6bb583d-158a-4dac-8e94-c3be8725cb15">
+      <driver-ref>mysql.8</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:mysql://localhost:3306/certification_db_test</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="certification_db_test" uuid="6a83c040-eef6-4e23-b16f-98d2ccecb37a">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>

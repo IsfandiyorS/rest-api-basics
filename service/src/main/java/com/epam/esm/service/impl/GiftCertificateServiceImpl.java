@@ -1,81 +1,78 @@
 package com.epam.esm.service.impl;
 
-import com.epam.esm.converter.impl.GiftCertificateConverter;
-import com.epam.esm.converter.impl.TagConverter;
+import com.epam.esm.criteria.GiftCertificateCriteria;
 import com.epam.esm.dao.GiftCertificateDao;
+import com.epam.esm.dao.TagDao;
 import com.epam.esm.dao.impl.TagDaoImpl;
-import com.epam.esm.dto.GenericDto;
-import com.epam.esm.dto.impl.*;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.enums.ErrorCodes;
-import com.epam.esm.exceptions.AlreadyExistException;
-import com.epam.esm.exceptions.IdRequiredException;
-import com.epam.esm.exceptions.ObjectNotFoundException;
-import com.epam.esm.exceptions.ValidationException;
-import com.epam.esm.service.AbstractCrudService;
+import com.epam.esm.exceptions.*;
 import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.validation.GiftCertificateValidator;
+import com.epam.esm.validation.TagValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.MultiValueMap;
 
 import java.util.*;
 
+import static com.epam.esm.constant.ActionMassages.FIELD;
+import static com.epam.esm.constant.ActionMassages.WRITTEN;
 import static com.epam.esm.constant.FilterParameters.*;
 import static java.lang.String.format;
 
+/**
+ * Class {@code GiftCertificateServiceImpl} is implementation of interface {@link GiftCertificateService}
+ * and intended to work with {@link GiftCertificate} objects.
+ *
+ * @author Sultonov Isfandiyor
+ * @version 1.0
+ */
 @Service
-public class GiftCertificateServiceImpl extends AbstractCrudService<GiftCertificate, GiftCertificateDto, GiftCertificateCreateDto, GiftCertificateUpdateDto, GiftCertificateDao> implements GiftCertificateService {
+public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     private final GiftCertificateDao giftCertificationDao;
-    private final TagDaoImpl tagDao;
-    private final TagConverter tagConverter;
-    private final GiftCertificateValidator validator;
-    private final GiftCertificateConverter giftCertificateConverter;
+    private final TagDao tagDao;
 
     @Autowired
-    public GiftCertificateServiceImpl(GiftCertificateDao giftCertificationDao, GiftCertificateValidator validator, TagDaoImpl tagDao, GiftCertificateConverter giftCertificateConverter, TagConverter tagConverter) {
+    public GiftCertificateServiceImpl(GiftCertificateDao giftCertificationDao, TagDaoImpl tagDao) {
         this.giftCertificationDao = giftCertificationDao;
-        this.validator = validator;
         this.tagDao = tagDao;
-        this.giftCertificateConverter = giftCertificateConverter;
-        this.tagConverter = tagConverter;
     }
 
     @Override
-    public GiftCertificateDto get(Long id) {
-        Optional<GiftCertificate> optional = giftCertificationDao.findById(id);
-        validate(optional, id, "Gift");
-        GiftCertificate giftCertificate = giftCertificationDao.findById(id).get();
-        return giftCertificateConverter.convertEntityToDto(giftCertificate);
+    public GiftCertificate getById(Long id) throws ObjectNotFoundException {
+        Optional<GiftCertificate> optionalGiftCertificate = giftCertificationDao.findById(id);
+        validate(optionalGiftCertificate);
+        return optionalGiftCertificate.get();
     }
 
     @Override
-    public List<GiftCertificateDto> getAll() {
-        List<GiftCertificate> giftCertificateList = giftCertificationDao.getAll();
-        List<GiftCertificateDto> dtoList = new ArrayList<>();
-        giftCertificateList.forEach(dto -> dtoList.add(giftCertificateConverter.convertEntityToDto(dto)));
-        return dtoList;
+    public List<GiftCertificate> getAll() {
+        return giftCertificationDao.getAll();
     }
 
     @Override
-    public GenericDto create(GiftCertificateCreateDto dto) {
-        validator.isCreateDtoValid(dto);
+    public Long create(GiftCertificate createEntity) throws AlreadyExistException, ValidationException, ActionFallDaoException {
+        GiftCertificateValidator.isCreateEntityValid(createEntity);
 
-        // fixme I think all of these logics should be in dao.
-        // fixme clarify there whether or not unique fields except gift certificate id
-        GiftCertificate giftCertificate = giftCertificateConverter.convertCreatedDtoToEntity(dto);
-        Long giftCertificationId = giftCertificationDao.save(giftCertificate);
+        Optional<GiftCertificate> certificateByName = giftCertificationDao.findByName(createEntity.getName());
 
-        if (!(dto.getTagCreateDtoList() == null || dto.getTagCreateDtoList().isEmpty())) {
-            List<TagCreateDto> tagCreateDtoList = dto.getTagCreateDtoList();
+        if (certificateByName.isPresent()) {
+            throw new AlreadyExistException(format(ErrorCodes.OBJECT_ALREADY_EXIST.message));
+        }
+
+        // fixme change this gift certificate id to the last line of method
+        Long giftCertificationId = giftCertificationDao.save(createEntity);
+
+        if (!(createEntity.getTagList() == null || createEntity.getTagList().isEmpty())) {
+            List<Tag> createdTagList = createEntity.getTagList();
             List<Long> tagIdList = new ArrayList<>();
-            for (TagCreateDto tag : tagCreateDtoList) {
+            for (Tag tag : createdTagList) {
                 Optional<Tag> optionalTag = tagDao.findByName(tag.getName());
 
                 if (optionalTag.isEmpty()) {
-                    tagIdList.add(tagDao.save(tagConverter.convertCreatedDtoToEntity(tag)));
+                    tagIdList.add(tagDao.save(tag));
                 } else {
                     tagIdList.add(optionalTag.get().getId());
                 }
@@ -85,149 +82,125 @@ public class GiftCertificateServiceImpl extends AbstractCrudService<GiftCertific
             }
         }
 
-        return new GenericDto(giftCertificationId);
+        return giftCertificationId;
     }
 
     @Override
-    public Boolean update(GiftCertificateUpdateDto dto) {
+    public void update(GiftCertificate updateEntity) throws ValidationException, ObjectNotFoundException, AlreadyExistException, ActionFallDaoException {
 
-        if (dto.getId() == null) {
-            throw new IdRequiredException(format(ErrorCodes.OBJECT_ID_REQUIRED.message, "Gift Certificate"));
+        if (updateEntity.getId() == null) {
+            throw new ValidationException(format(ErrorCodes.OBJECT_ID_REQUIRED.message));
         }
 
-        Optional<GiftCertificate> optionalGiftCertificate = giftCertificationDao.findById(dto.getId());
-        get(dto.getId());
+        getById(updateEntity.getId());
 
         Map<String, String> updateFieldsMap = new HashMap<>();
-        if (!validator.isUpdateDtoValid(dto, updateFieldsMap)) {
-            throw new ValidationException(format(ErrorCodes.OBJECT_SHOULD_BE.message, "At least one gift certificate field", "written"));
+        if (!GiftCertificateValidator.isUpdateEntityValid(updateEntity, updateFieldsMap)) {
+            throw new ValidationException(format(ErrorCodes.OBJECT_SHOULD_BE.message, FIELD, WRITTEN));
         }
         giftCertificationDao.update(updateFieldsMap);
-        if (dto.getTagList() != null) {
-            List<Tag> allCreatedTags = tagDao.getAttachedTagsWithGiftCertificateId(dto.getId());
-            List<Tag> tagList = new ArrayList<>();
-            for (TagCreateDto tagCreateDto : dto.getTagList()) {
-                tagList.add(tagConverter.convertCreatedDtoToEntity(tagCreateDto));
-            }
-
-            checkTagsForAvailabilityAndSave(tagList, allCreatedTags, dto.getId());
+        if (updateEntity.getTagList() != null) {
+            List<Tag> allCreatedTags = tagDao.getAttachedTagsWithGiftCertificateId(updateEntity.getId());
+            checkTagsForAvailabilityAndSave(updateEntity.getTagList(), allCreatedTags, updateEntity.getId());
         }
-
-        return true;
     }
 
     @Override
-    public Boolean delete(Long id) {
+    public Long delete(Long id) throws ObjectNotFoundException, ActionFallDaoException {
         Optional<GiftCertificate> optionalGiftCertificate = giftCertificationDao.findById(id);
         if (optionalGiftCertificate.isEmpty()) {
-            throw new ObjectNotFoundException(format(ErrorCodes.OBJECT_NOT_FOUND_ID.message, "Tag", id));
+            throw new ObjectNotFoundException(format(ErrorCodes.OBJECT_NOT_FOUND_ID.message));
         }
-
-        giftCertificationDao.removeById(id);
-        return true;
+        return giftCertificationDao.deleteById(id);
     }
 
     @Override
-    public void validate(Optional<GiftCertificate> entity, Long id, String entityName) {
-        if (entity.isEmpty()) {
-            throw new ObjectNotFoundException(format(ErrorCodes.OBJECT_NOT_FOUND_ID.message, entityName, id));
-        }
+    public List<GiftCertificate> doFilter(GiftCertificateCriteria criteria) throws ObjectNotFoundDaoException {
+        Map<String, String> map = new HashMap<>();
+        map.put(NAME, criteria.getName());
+        map.put(TAG_NAME, criteria.getTagName());
+        map.put(PART_OF_NAME, criteria.getPartOfName());
+        map.put(PART_OF_DESCRIPTION, criteria.getPartOfDescription());
+        map.put(PART_OF_TAG_NAME, criteria.getPartOfTagName());
+        map.put(SORT_BY_NAME, criteria.getSortByName());
+        map.put(SORT_BY_CREATE_DATE, criteria.getSortByCreateDate());
+        map.put(SORT_BY_TAG_NAME, criteria.getSortByTagName());
+
+        return giftCertificationDao.doFilter(map);
     }
 
     @Override
-    public List<TagDto> getAttachedTagsWithGiftCertificateId(Long id) {
-        get(id);
-        List<Tag> tagList = giftCertificationDao.getAttachedTagsWithGiftCertificateId(id);
-        List<TagDto> tagDtoList = new ArrayList<>();
-        tagList.forEach(tag -> tagDtoList.add(tagConverter.convertEntityToDto(tag)));
-        return tagDtoList;
+    public List<Tag> getAttachedTagsWithGiftCertificateId(Long id) throws ObjectNotFoundException {
+        getById(id);
+        return giftCertificationDao.getAttachedTagsWithGiftCertificateId(id);
+    }
+
+    // fixme this should resolve and check if these tags deleted
+    @Override
+    public void attachTagsToGiftCertificate(Long giftCertificateId, List<Tag> tagList) throws AlreadyExistException, ValidationException, ObjectNotFoundException, ActionFallDaoException {
+        getById(giftCertificateId);
+        TagValidator.validateListOfTags(tagList);
+        List<Tag> alreadyExistedTags = tagDao.getAttachedTagsWithGiftCertificateId(giftCertificateId);
+        checkTagsForAvailabilityAndSave(tagList, alreadyExistedTags, giftCertificateId);
     }
 
     @Override
-    public Boolean attachTagsToGiftCertificate(Long giftCertificateId, List<TagCreateDto> tags) {
-        validator.validateListOfTags(tags);
-
-        List<Tag> tagDto = tagDao.getAll();
-        List<Tag> tagDtoList = new ArrayList<>();
-        tags.forEach(dto -> tagDtoList.add(new Tag(dto.getName())));
-        checkTagsForAvailabilityAndSave(tagDtoList, tagDto, giftCertificateId);
-        return true;
-    }
-
-    @Override
-    public Boolean deleteAssociatedTags(Long id, List<TagCreateDto> tags) {
+    public Long deleteAssociatedTags(Long id, List<Tag> tags) throws ObjectNotFoundException, ValidationException, ActionFallDaoException {
         Optional<GiftCertificate> optionalGiftCertificateDto = giftCertificationDao.findById(id);
         if (optionalGiftCertificateDto.isEmpty()) {
-            throw new ObjectNotFoundException(format(ErrorCodes.OBJECT_NOT_FOUND_ID.message, "Gift Certificate", id));
+            throw new ObjectNotFoundException(ErrorCodes.OBJECT_NOT_FOUND_ID.message);
         }
-        validator.validateListOfTags(tags);
-        giftCertificationDao.deleteTagsAssociation(id, getTagsId(tags, id));
-        return true;
+        TagValidator.validateListOfTags(tags);
+        Long deleteEntity;
+        try {
+            deleteEntity = giftCertificationDao.deleteTagsAssociation(id, tags);
+        } catch (ObjectNotFoundDaoException e) {
+            throw new ObjectNotFoundException(e.getMessage());
+        }
+        return deleteEntity;
     }
 
-    private void checkTagsForAvailabilityAndSave(List<Tag> requestTags, List<Tag> allCreatedNewTags, Long giftCertificateId) {
+    @Override
+    public void validate(Optional<GiftCertificate> entity) throws ObjectNotFoundException {
+        if (entity.isEmpty()) {
+            throw new ObjectNotFoundException(format(ErrorCodes.OBJECT_NOT_FOUND_ID.message));
+        }
+    }
+
+    // todo check it to working or not
+
+    private void checkTagsForAvailabilityAndSave(List<Tag> requestTags, List<Tag> allCreatedNewTags, Long giftCertificateId) throws AlreadyExistException, ActionFallDaoException, ObjectNotFoundException {
         if (requestTags == null) {
             return;
         }
-
-        for (Tag request : requestTags) {
-            boolean isExist = false;
-            for (Tag created : allCreatedNewTags) {
-                if (Objects.equals(request.getName(), created.getName())) {
-                    isExist = true;
-                    break;
-                }
-            }
-            if (!isExist) {
-                throw new AlreadyExistException(format(ErrorCodes.OBJECT_ALREADY_EXIST.message, "Tag", "name"));
-            }
-            Long tagId = tagDao.save(new Tag(request.getName()));
-            tagDao.attachTagToGiftCertificate(tagId, giftCertificateId);
-        }
-    }
-
-    private List<Long> getTagsId(List<TagCreateDto> tags, Long giftCertificateId) {
-        List<Long> tagIdList = new ArrayList<>();
-        tags.forEach(tag -> {
-            String tagName = tag.getName();
-            Optional<Tag> optionalTag = tagDao.findByName(tagName);
-            if (optionalTag.isEmpty()) {
-                throw new ObjectNotFoundException(format(ErrorCodes.OBJECT_NOT_FOUND_BY_FIELD.message, "Tag name", tagName + " name"));
-            } else {
-                boolean exist = tagDao.checkForAvailabilityOfTagIdInRelatedTable(optionalTag.get().getId(), giftCertificateId);
-                if (exist) {
-                    tagIdList.add(optionalTag.get().getId());
-                } else {
-                    throw new ValidationException(format(ErrorCodes.OBJECT_NOT_FOUND.message, format("Attached Tag by this %s name", optionalTag.get().getName())));
-                }
-            }
-        });
-        return tagIdList;
-    }
-
-    public List<GiftCertificateDto> doFilter(MultiValueMap<String, String> requestParams) {
-        Map<String, String> map = new HashMap<>();
-        map.put(NAME, getSingleRequestParameter(requestParams, NAME));
-        map.put(TAG_NAME, getSingleRequestParameter(requestParams, TAG_NAME));
-        map.put(PART_OF_NAME, getSingleRequestParameter(requestParams, PART_OF_NAME));
-        map.put(PART_OF_DESCRIPTION, getSingleRequestParameter(requestParams, PART_OF_DESCRIPTION));
-        map.put(PART_OF_TAG_NAME, getSingleRequestParameter(requestParams, PART_OF_TAG_NAME));
-        map.put(SORT_BY_NAME, getSingleRequestParameter(requestParams, SORT_BY_NAME));
-        map.put(SORT_BY_CREATE_DATE, getSingleRequestParameter(requestParams, SORT_BY_CREATE_DATE));
-        map.put(SORT_BY_TAG_NAME, getSingleRequestParameter(requestParams, SORT_BY_TAG_NAME));
-
-        List<GiftCertificate> giftCertificateList = giftCertificationDao.getGiftCertificateByFilteringParameters(map);
-        List<GiftCertificateDto> dtoList = new ArrayList<>();
-
-        giftCertificateList.forEach(dto -> dtoList.add(giftCertificateConverter.convertEntityToDto(dto)));
-        return dtoList;
-    }
-
-    protected String getSingleRequestParameter(MultiValueMap<String, String> requestParams, String parameter) {
-        if (requestParams.containsKey(parameter)) {
-            return requestParams.get(parameter).get(0);
+        if (allCreatedNewTags == null || allCreatedNewTags.isEmpty()) {
+            requestTags.forEach(tagDao::save);
         } else {
-            return null;
+            for (Tag request : requestTags) {
+                boolean isExist = false;
+                for (Tag created : allCreatedNewTags) {
+                    if (Objects.equals(request.getName(), created.getName())) {
+                        isExist = true;
+                        break;
+                    }
+                }
+                if (isExist) {
+                    throw new AlreadyExistException(format(ErrorCodes.OBJECT_ALREADY_EXIST.message));
+                }
+                Optional<Tag> optionalTag = tagDao.findByName(request.getName());
+                Long tagId;
+//                if (optionalTag.isEmpty()){
+//                    tagId = tagDao.save(new Tag(request.getName()));
+//                } else {
+//                    tagId = optionalTag.get().getId();
+//                }
+                if (optionalTag.isEmpty()){
+                    throw new ObjectNotFoundException(format(ErrorCodes.OBJECT_NOT_FOUND.message));
+                }else {
+                    tagId = optionalTag.get().getId();
+                }
+                giftCertificationDao.attachTagToGiftCertificate(tagId, giftCertificateId);
+            }
         }
     }
 

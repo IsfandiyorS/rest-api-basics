@@ -19,13 +19,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.epam.esm</groupId>
-            <artifactId>model</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
@@ -48,6 +41,14 @@
             <artifactId>postgresql</artifactId>
             <version>42.5.0</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.31</version>
+        </dependency>
+
 
         <dependency>
             <groupId>com.zaxxer</groupId>

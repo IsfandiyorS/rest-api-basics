@@ -1,23 +1,25 @@
 package com.epam.esm.validation;
 
-import com.epam.esm.dto.impl.GiftCertificateCreateDto;
-import com.epam.esm.dto.impl.GiftCertificateUpdateDto;
-import com.epam.esm.dto.impl.TagCreateDto;
+import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.enums.ErrorCodes;
 import com.epam.esm.exceptions.ValidationException;
-import com.epam.esm.utils.BaseUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import lombok.experimental.UtilityClass;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Map;
 
-import static com.epam.esm.mapper.GiftCertificateColumn.*;
+import static com.epam.esm.constant.GiftCertificateColumn.*;
 import static java.lang.String.format;
 
-@Component
-public class GiftCertificateValidator implements BaseValidator<GiftCertificateCreateDto, GiftCertificateUpdateDto> {
+/**
+ * Class {@code GiftCertificateValidator} provides methods to validate
+ * fields of {@link com.epam.esm.entity.GiftCertificate}.
+ *
+ * @author Sultonov Isfandiyor
+ * @version 1.0
+ */
+@UtilityClass
+public class GiftCertificateValidator {
 
     private static final int NAME_MAX_LENGTH = 50;
     private static final int NAME_MIN_LENGTH = 1;
@@ -26,104 +28,78 @@ public class GiftCertificateValidator implements BaseValidator<GiftCertificateCr
     private static final BigDecimal PRICE_MIN_VALUE = BigDecimal.ONE;
     private static final BigDecimal PRICE_MAX_VALUE = new BigDecimal(Integer.MAX_VALUE);
     private static final int DURATION_MIN_VALUE = 1;
-    private final BaseUtils baseUtils;
 
-    private final TagValidator tagValidator;
-
-    @Autowired
-    public GiftCertificateValidator(BaseUtils baseUtils, TagValidator tagValidator) {
-        this.baseUtils = baseUtils;
-        this.tagValidator = tagValidator;
-    }
-
-    @Override
-    public void isCreateDtoValid(GiftCertificateCreateDto createDto) {
-        if (isNameValid(createDto.getName()) && isDescriptionValid(createDto.getDescription()) && isDurationValid(createDto.getDuration())) {
-            isPriceValid(createDto.getPrice());
+    /**
+     * Validate all fields of gift certificate which will send for create gift certificate.
+     *
+     * @param createEntity the gift certificate
+     */
+    public void isCreateEntityValid(GiftCertificate createEntity) throws ValidationException {
+        if (isNameValid(createEntity.getName()) && isDescriptionValid(createEntity.getDescription())
+                && isDurationValid(createEntity.getDuration())) {
+            isPriceValid(createEntity.getPrice());
         }
     }
 
-    @Override
-    public boolean isUpdateDtoValid(GiftCertificateUpdateDto updateDto, Map<String, String> updateFieldsMap) {
-        if (!baseUtils.isEmpty(updateDto.getName())) {
-            updateFieldsMap.put(NAME, updateDto.getName());
+    /**
+     * Validate fields which required for update gift certificate.
+     *
+     * @param updateEntity the gift certificate
+     * @param updateFieldsMap used for storing fields if they will send.
+     */
+    public boolean isUpdateEntityValid(GiftCertificate updateEntity, Map<String, String> updateFieldsMap) {
+        if (!BaseValidationUtils.isEmptyString(updateEntity.getName())) {
+            updateFieldsMap.put(NAME, updateEntity.getName());
         }
-        if (!baseUtils.isEmpty(updateDto.getDescription())) {
-            updateFieldsMap.put(DESCRIPTION, updateDto.getDescription());
+        if (!BaseValidationUtils.isEmptyString(updateEntity.getDescription())) {
+            updateFieldsMap.put(DESCRIPTION, updateEntity.getDescription());
         }
-        if (!baseUtils.isEmpty(updateDto.getDuration())) {
-            updateFieldsMap.put(DURATION, updateDto.getDuration().toString());
+        if (!BaseValidationUtils.isEmptyObject(updateEntity.getDuration())) {
+            updateFieldsMap.put(DURATION, updateEntity.getDuration().toString());
         }
-        if (!baseUtils.isEmpty(updateDto.getPrice())) {
-            updateFieldsMap.put(PRICE, updateDto.getPrice().toString());
+        if (!BaseValidationUtils.isEmptyObject(updateEntity.getPrice())) {
+            updateFieldsMap.put(PRICE, updateEntity.getPrice().toString());
         }
-        if (!baseUtils.isEmpty(updateDto.getId())) {
-            updateFieldsMap.put(ID, updateDto.getId().toString());
+        if (!BaseValidationUtils.isEmptyObject(updateEntity.getId())) {
+            updateFieldsMap.put(ID, updateEntity.getId().toString());
         }
-        return updateFieldsMap.size()>0 || updateDto.getTagList().size()>0;
+        return updateFieldsMap.size() > 0 || updateEntity.getTagList().size() > 0;
     }
 
-    public void validateListOfTags(List<TagCreateDto> tags) {
-        if (baseUtils.isEmpty(tags)) {
-            return;
+    public boolean isNameValid(String name) throws ValidationException {
+        if (BaseValidationUtils.isEmptyString(name)) {
+            throw new ValidationException(format(ErrorCodes.OBJECT_IS_NULL.message, "name"));
         }
-        for (TagCreateDto tag : tags) {
-            tagValidator.isCreateDtoValid(tag);
-        }
-    }
-
-    public boolean isNameValid(String name) {
-        if (baseUtils.isEmpty(name)) {
-            throw new ValidationException(format(ErrorCodes.OBJECT_IS_NULL.message, "Gift Certificate name"));
-        }
-        if (!baseUtils.isStringLengthValid(name, NAME_MIN_LENGTH, NAME_MAX_LENGTH)) {
-            throw new ValidationException(format(ErrorCodes.FIELD_LENGTH_SHOULD_BE.message, "Gift Certificate name", NAME_MIN_LENGTH, NAME_MAX_LENGTH));
+        if (!BaseValidationUtils.isStringLengthValid(name, NAME_MIN_LENGTH, NAME_MAX_LENGTH)) {
+            throw new ValidationException(format(ErrorCodes.FIELD_LENGTH_SHOULD_BE.message, "Name", NAME_MIN_LENGTH, NAME_MAX_LENGTH));
         }
         return true;
     }
 
-    public boolean isDescriptionValid(String description) {
-        if (baseUtils.isEmpty(description)) {
-            throw new ValidationException(format(ErrorCodes.OBJECT_IS_NULL.message, "Gift Certificate description"));
+    public boolean isDescriptionValid(String description) throws ValidationException {
+        if (BaseValidationUtils.isEmptyString(description)) {
+            throw new ValidationException(format(ErrorCodes.OBJECT_IS_NULL.message, "description"));
         }
-        if (!baseUtils.isStringLengthValid(description, DESCRIPTION_MIN_LENGTH, DESCRIPTION_MAX_LENGTH)) {
-            throw new ValidationException(format(ErrorCodes.FIELD_LENGTH_SHOULD_BE.message, "Gift Certificate description", DESCRIPTION_MIN_LENGTH, DESCRIPTION_MAX_LENGTH));
+        if (!BaseValidationUtils.isStringLengthValid(description, DESCRIPTION_MIN_LENGTH, DESCRIPTION_MAX_LENGTH)) {
+            throw new ValidationException(format(ErrorCodes.FIELD_LENGTH_SHOULD_BE.message, "Description", DESCRIPTION_MIN_LENGTH, DESCRIPTION_MAX_LENGTH));
         }
         return true;
     }
 
-    public boolean isPriceValid(BigDecimal price) {
-        if (baseUtils.isEmpty(price)) {
-            throw new ValidationException(format(ErrorCodes.OBJECT_IS_NULL.message, "Gift Certificate description"));
+    public void isPriceValid(BigDecimal price) throws ValidationException {
+        if (BaseValidationUtils.isEmptyObject(price)) {
+            throw new ValidationException(format(ErrorCodes.OBJECT_IS_NULL.message, "description"));
         }
         if (!(price.compareTo(PRICE_MIN_VALUE) >= 0 && price.compareTo(PRICE_MAX_VALUE) <= 0)) {
-            throw new ValidationException(format(ErrorCodes.FIELD_LENGTH_SHOULD_BE.message, "Gift Certificate price", PRICE_MIN_VALUE, PRICE_MAX_VALUE));
+            throw new ValidationException(format(ErrorCodes.FIELD_LENGTH_SHOULD_BE.message, "Price", PRICE_MIN_VALUE, PRICE_MAX_VALUE));
         }
-        return true;
     }
 
-    public boolean isDurationValid(int duration) {
+    public boolean isDurationValid(int duration) throws ValidationException {
         if (duration < DURATION_MIN_VALUE) {
-            throw new ValidationException(format(ErrorCodes.OBJECT_SHOULD_BE.message, "Gift Certificate duration", "more than 0"));
+            throw new ValidationException(format(ErrorCodes.OBJECT_SHOULD_BE.message, "duration", "more than 0"));
         }
         return true;
     }
-
-//    public void validateFilterSortParams(Map<String, String> filterMap, MultiValueMap<String, String> requestParams, String param) {
-//        String requestParameter = getSingleRequestParameter(requestParams, param);
-//        if (requestParameter!=null && (!requestParameter.equalsIgnoreCase("asc") || !requestParameter.equalsIgnoreCase("desc"))){
-//            throw new ObjectNotFoundDaoException(format(ErrorCodes.FIELD_IN_CORRECT.message, param));
-//        } else {
-//            filterMap.put(param, getSingleRequestParameter(requestParams, param));
-//        }
-//    }
-//
-//    protected String getSingleRequestParameter(MultiValueMap<String, String> requestParams, String parameter) {
-//        if (requestParams.containsKey(parameter)) {
-//            return requestParams.get(parameter).get(0);
-//        } else {
-//            return null;
-//        }
-//    }
 
 }

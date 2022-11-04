@@ -1,6 +1,12 @@
 package com.epam.esm.exceptions;
 
-public class AlreadyExistException extends GenericException{
+/**
+ * Class {@code AlreadyExistException} used in the case of there is already created entity given by its field.
+ *
+ * @author Sultonov Isfandiyor
+ * @version 1.0
+ */
+public class AlreadyExistException extends Exception {
     public AlreadyExistException() {
         super();
     }

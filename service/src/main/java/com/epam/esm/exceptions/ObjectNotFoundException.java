@@ -1,6 +1,13 @@
 package com.epam.esm.exceptions;
 
-public class ObjectNotFoundException extends GenericException{
+/**
+ * Class {@code ObjectNotFoundException} used in the case of there will not find object by given field.
+ *
+ * @author Sultonov Isfandiyor
+ * @version 1.0
+ */
+// fixme concat Two exceptions to onw
+public class ObjectNotFoundException extends Exception {
     public ObjectNotFoundException() {
     }
 

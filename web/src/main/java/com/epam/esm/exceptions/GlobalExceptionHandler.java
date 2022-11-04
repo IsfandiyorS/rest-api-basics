@@ -1,36 +1,46 @@
 package com.epam.esm.exceptions;
 
 import com.epam.esm.enums.ErrorCodes;
+import com.epam.esm.response.ExceptionResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
+
+/**
+ * Class {@code GlobalExceptionHandler} presents entity which will be returned from controller
+ * in case generating exceptions
+ *
+ * @author Sultonov Isfandiyor
+ * @version 1.0
+ */
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // fixme should resolve problem with NoHandlerFoundException
     @ResponseStatus(NOT_FOUND)
     @ExceptionHandler(NoHandlerFoundException.class)
-    protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException ex, HttpHeaders headers,
-                                                                   HttpStatus status, WebRequest request) {
+    protected ResponseEntity<Object> handleNoHandlerFoundException() {
         return new ResponseEntity<>(
-                new ExceptionResponse(status.value(), ex.getMessage()),
-                status
+                new ExceptionResponse(NOT_FOUND.value(), "No handler found"),
+                NOT_FOUND
         );
     }
+
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(ActionFallDaoException.class)
+    public final ResponseEntity<ExceptionResponse> handleActionFallException(
+            final Exception exception, final WebRequest status){
+        return constructExceptionResponse(exception, status, INTERNAL_SERVER_ERROR);
+    }
+
 
     @ExceptionHandler({MethodArgumentNotValidException.class, JsonProcessingException.class})
     public final ResponseEntity<Object> handleBadRequestExceptions(
@@ -40,17 +50,16 @@ public class GlobalExceptionHandler {
     }
 
     @ResponseStatus(NOT_FOUND)
-    @ExceptionHandler(value = {ObjectNotFoundException.class, DaoException.class})
+    @ExceptionHandler(value = {ObjectNotFoundException.class, ObjectNotFoundDaoException.class})
     public ResponseEntity<ExceptionResponse> handleNotFoundException(
-            final RuntimeException ex, final WebRequest request) {
+            final Exception ex, final WebRequest request) {
         return constructExceptionResponse(ex, request, NOT_FOUND);
     }
 
     @ResponseStatus(BAD_REQUEST)
-    @ExceptionHandler(value = {ValidationException.class, IdRequiredException.class,
-            AlreadyExistException.class})
+    @ExceptionHandler(value = {ValidationException.class, AlreadyExistException.class})
     public ResponseEntity<ExceptionResponse> handleBadRequestException(
-            final RuntimeException ex, final WebRequest request) {
+            final Exception ex, final WebRequest request) {
         return constructExceptionResponse(ex, request, BAD_REQUEST);
     }
 
@@ -68,7 +77,7 @@ public class GlobalExceptionHandler {
 
 
     private ResponseEntity<ExceptionResponse> constructExceptionResponse(
-            final RuntimeException ex, final WebRequest request, HttpStatus status) {
+            final Exception ex, final WebRequest request, HttpStatus status) {
         return new ResponseEntity<>(
                 new ExceptionResponse(status.value(), ex.getMessage()),
                 status

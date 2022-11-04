@@ -1,6 +1,13 @@
 package com.epam.esm.constant;
 
-public class FilterParameters {
+/**
+ * Class {@code FilterParameters} defined with final key word it indicates this class
+ * contains unchangeable filter elements.
+ *
+ * @author Sultonov Isfandiyor
+ * @version 1.0
+ */
+public final class FilterParameters {
     /**
      * Filter options.
      */
@@ -12,4 +19,7 @@ public class FilterParameters {
     public static final String SORT_BY_NAME = "sortByName";
     public static final String SORT_BY_CREATE_DATE = "sortByCreateDate";
     public static final String SORT_BY_TAG_NAME = "sortByTagName";
+
+    private FilterParameters() {
+    }
 }

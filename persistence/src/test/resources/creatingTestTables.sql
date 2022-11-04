@@ -13,7 +13,7 @@ DROP TABLE IF EXISTS gift_certificate;
 CREATE TABLE IF NOT EXISTS gift_certificate
 (
     id SERIAL PRIMARY KEY NOT NULL ,
-    name VARCHAR NOT NULL ,
+    name VARCHAR(50) NOT NULL ,
     description TEXT NOT NULL ,
     price NUMERIC NOT NULL ,
     duration INT NOT NULL ,

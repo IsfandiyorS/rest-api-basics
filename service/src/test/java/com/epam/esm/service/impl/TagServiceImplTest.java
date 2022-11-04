@@ -1,14 +1,13 @@
 package com.epam.esm.service.impl;
 
+import com.epam.esm.criteria.TagCriteria;
 import com.epam.esm.dao.impl.TagDaoImpl;
-import com.epam.esm.dto.GenericDto;
-import com.epam.esm.dto.impl.TagCreateDto;
-import com.epam.esm.dto.impl.TagDto;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exceptions.AlreadyExistException;
+import com.epam.esm.exceptions.ObjectNotFoundDaoException;
 import com.epam.esm.exceptions.ObjectNotFoundException;
+import com.epam.esm.exceptions.ValidationException;
 import com.epam.esm.mapper.TagMapper;
-import com.epam.esm.validation.TagValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,9 +15,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import static com.epam.esm.constant.FilterParameters.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -27,9 +29,7 @@ import static org.mockito.Mockito.*;
 class TagServiceImplTest {
 
     @Mock
-    private TagDaoImpl tagDao;
-    @Mock
-    private TagValidator tagValidator;
+    private TagDaoImpl tagDao = mock(TagDaoImpl.class);
     @Mock
     private TagMapper tagMapper;
 
@@ -49,60 +49,101 @@ class TagServiceImplTest {
     }
 
     @Test
-    void getTagById() {
+    void testGetTagById() throws ObjectNotFoundException {
         Tag expected = tagList.get(0);
         when(tagDao.findById(1L)).thenReturn(Optional.of(expected));
-        TagDto tagDto = tagService.get(1L);
-        Tag actual = new Tag(tagDto.getId(), tagDto.getName());
+        Tag actual = tagService.getById(1L);
         assertEquals(expected, actual);
     }
 
     @Test
-    void shouldThrowErrorWhenGettingTagWithById() {
+    void testShouldThrowErrorWhenGettingNotExistedId() {
         Long id = 6L;
         given(tagDao.findById(id)).willReturn(Optional.empty());
-        ObjectNotFoundException notFoundException = assertThrows(ObjectNotFoundException.class, () -> {
-            tagService.get(id);
-        });
+        ObjectNotFoundException notFoundException = assertThrows(
+                ObjectNotFoundException.class, () -> {
+                    tagService.getById(id);
+                });
 
-        String expectedMessage = String.format("Tag with provided id: %s not found", id);
+        String expectedMessage = "Object with provided id not found";
         String actualMessage = notFoundException.getMessage();
 
         assertEquals(expectedMessage, actualMessage);
     }
 
     @Test
-    void getAll() {
+    void testGetAll() {
         when(tagDao.getAll()).thenReturn(tagList);
-        List<TagDto> tagDaoList = tagService.getAll();
+        List<Tag> tagDaoList = tagService.getAll();
         assertEquals(tagDaoList.size(), tagList.size());
     }
 
     @Test
-    void createTagIfDoesNotExist() {
-        TagCreateDto tagCreateDto = new TagCreateDto("tag5");
+    void testCreateTagIfDoesNotExist() throws ValidationException, AlreadyExistException {
+        Tag tag = new Tag("tag5");
 
-        given(tagDao.findByName(tagCreateDto.getName())).willReturn(Optional.empty());
+        given(tagDao.findByName(tag.getName())).willReturn(Optional.empty());
         given(tagDao.save(new Tag("tag5"))).willReturn(5L);
-        GenericDto genericDto = tagService.create(tagCreateDto);
+        Long tagId = tagService.create(tag);
 
-        assertEquals(genericDto.getId(), 5L);
-        verify(tagDao).save(new Tag("tag5"));
+        assertEquals(tagId, 5L);
+        verify(tagDao).save(tag);
     }
 
     @Test
-    void shouldThrowErrorWhenCreatingRepeatedTag() {
-        TagCreateDto tagCreateDto = new TagCreateDto("tag4");
-        given(tagDao.findByName(tagCreateDto.getName())).willReturn(Optional.of(new Tag("tag4")));
+    void testCreateTagShouldThrowErrorWhenCreatingRepeatedTag() {
+        Tag tag = tagList.get(3);
+        given(tagDao.findByName(tag.getName())).willReturn(Optional.of(tag));
 
-        AlreadyExistException alreadyExistException = assertThrows(AlreadyExistException.class, () -> {
-            tagService.create(tagCreateDto);
-        });
+        AlreadyExistException alreadyExistException = assertThrows(
+                AlreadyExistException.class, () -> {
+                    tagService.create(tag);
+                });
 
-        String expectedMessage = "Tag by this name already exist";
+        String expectedMessage = "Object by this name already exist";
         String actualMessage = alreadyExistException.getMessage();
 
         assertEquals(expectedMessage, actualMessage);
     }
 
+    @Test
+    void testValidate() {
+        ObjectNotFoundException notFoundException = assertThrows(
+                ObjectNotFoundException.class, () -> {
+                    tagService.validate(Optional.empty());
+                });
+
+        String expectedMessage = "Object with provided id not found";
+        String actualMessage = notFoundException.getMessage();
+
+        assertEquals(expectedMessage, actualMessage);
+    }
+
+    @Test
+    void testDoFilter() throws ObjectNotFoundDaoException {
+        TagCriteria criteria = new TagCriteria("tag", null, null);
+
+        Map<String, String> tagFilterMap = new HashMap<>();
+        tagFilterMap.put(TAG_NAME, criteria.getTagName());
+        tagFilterMap.put(SORT_BY_TAG_NAME, criteria.getSortByTagName());
+        tagFilterMap.put(PART_OF_TAG_NAME, criteria.getPartOfTagName());
+
+        given(tagDao.doFilter(tagFilterMap)).willReturn(List.of(new Tag(1L, "tag")));
+        List<Tag> actual = tagService.doFilter(criteria);
+        assertFalse(actual.isEmpty());
+    }
+
+    @Test
+    void testDeleteByIdShouldThrowException() {
+
+        ObjectNotFoundException notFoundException = assertThrows(
+            ObjectNotFoundException.class, () -> {
+                tagService.delete(4L);
+            });
+
+        String expectedMessage = "Object with provided id not found";
+        String actualMessage = notFoundException.getMessage();
+
+        assertEquals(expectedMessage, actualMessage);
+    }
 }

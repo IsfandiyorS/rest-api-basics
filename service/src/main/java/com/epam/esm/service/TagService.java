@@ -1,9 +1,13 @@
 package com.epam.esm.service;
 
-import com.epam.esm.dto.impl.TagCreateDto;
-import com.epam.esm.dto.impl.TagDto;
-import com.epam.esm.dto.impl.TagUpdateDto;
+import com.epam.esm.criteria.TagCriteria;
 import com.epam.esm.entity.Tag;
 
-public interface TagService extends GenericCrudService<Tag, TagDto, TagCreateDto, TagUpdateDto, Long> {
+/**
+ * Interface {@code TagService} describes abstract behavior for working with {@link Tag} objects.
+ *
+ * @author Sultonov Isfandiyor
+ * @version 1.0
+ */
+public interface TagService extends GenericCrudService<Tag, Long, TagCriteria> {
 }

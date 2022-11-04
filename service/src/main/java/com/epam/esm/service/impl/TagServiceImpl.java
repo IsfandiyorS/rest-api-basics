@@ -1,86 +1,87 @@
 package com.epam.esm.service.impl;
 
-import com.epam.esm.converter.impl.TagConverter;
+import com.epam.esm.criteria.TagCriteria;
 import com.epam.esm.dao.TagDao;
-import com.epam.esm.dao.impl.TagDaoImpl;
-import com.epam.esm.dto.GenericDto;
-import com.epam.esm.dto.impl.TagCreateDto;
-import com.epam.esm.dto.impl.TagDto;
-import com.epam.esm.dto.impl.TagUpdateDto;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.enums.ErrorCodes;
-import com.epam.esm.exceptions.AlreadyExistException;
-import com.epam.esm.exceptions.ObjectNotFoundException;
-import com.epam.esm.service.AbstractCrudService;
+import com.epam.esm.exceptions.*;
 import com.epam.esm.service.TagService;
 import com.epam.esm.validation.TagValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import static com.epam.esm.constant.FilterParameters.*;
 import static java.lang.String.format;
 
+
+/**
+ * Class {@code TagServiceImpl} is implementation of interface {@link TagService}
+ * and intended to work with {@link Tag} objects.
+ *
+ * @author Sultonov Isfandiyor
+ * @version 1.0
+ */
 @Service
-public class TagServiceImpl extends AbstractCrudService<Tag, TagDto, TagCreateDto, TagUpdateDto, TagDaoImpl> implements TagService {
+public class TagServiceImpl implements TagService {
 
     private final TagDao tagDao;
-    private final TagValidator validator;
-    private static final TagConverter tagConverter = new TagConverter();
 
     @Autowired
-    public TagServiceImpl(TagDao tagDao, TagValidator validator) {
+    public TagServiceImpl(TagDao tagDao) {
         this.tagDao = tagDao;
-        this.validator = validator;
     }
 
     @Override
-    public TagDto get(Long id) {
+    public Tag getById(Long id) throws ObjectNotFoundException {
         Optional<Tag> optionalTag = tagDao.findById(id);
-        validate(optionalTag, id, "Tag");
-        TagDto tagDto = new TagDto();
-        return tagConverter.convertEntityToDto(optionalTag.get());
+        validate(optionalTag);
+        return optionalTag.get();
     }
 
     @Override
-    public List<TagDto> getAll() {
-        List<Tag> tagList = tagDao.getAll();
-        List<TagDto> tagDtoList = new ArrayList<>();
-        tagList.forEach(entity -> tagDtoList.add(tagConverter.convertEntityToDto(entity)));
-        return tagDtoList;
+    public List<Tag> getAll() {
+        return tagDao.getAll();
     }
 
     @Override
-    public GenericDto create(TagCreateDto dto) {
+    public Long create(Tag createEntity) throws AlreadyExistException, ValidationException {
 
-        validator.isCreateDtoValid(dto);
+        TagValidator.isCreateEntityValid(createEntity);
 
-        Optional<Tag> optionalTag = tagDao.findByName(dto.getName());
+        Optional<Tag> optionalTag = tagDao.findByName(createEntity.getName());
 
         if (optionalTag.isPresent()) {
-            throw new AlreadyExistException(format(ErrorCodes.OBJECT_ALREADY_EXIST.message, "Tag", "name"));
+            throw new AlreadyExistException(format(ErrorCodes.OBJECT_ALREADY_EXIST.message));
         }
 
-        Tag tag = tagConverter.convertCreatedDtoToEntity(dto);
-
-        return new GenericDto(tagDao.save(tag));
+        return tagDao.save(createEntity);
     }
 
     @Override
-    public Boolean delete(Long id) {
-
-        Optional<Tag> optionalTag = tagDao.findById(id);
-        validate(optionalTag, id, "Tag");
-        tagDao.removeById(id);
-        return true;
+    public Long delete(Long id) throws ObjectNotFoundException, ActionFallDaoException {
+        getById(id);
+        return tagDao.deleteById(id);
     }
 
     @Override
-    public void validate(Optional<Tag> entity, Long id, String entityName) {
+    public List<Tag> doFilter(TagCriteria criteria) throws ObjectNotFoundDaoException {
+        Map<String, String> tagFilterMap = new HashMap<>();
+        tagFilterMap.put(TAG_NAME, criteria.getTagName());
+        tagFilterMap.put(SORT_BY_TAG_NAME, criteria.getSortByTagName());
+        tagFilterMap.put(PART_OF_TAG_NAME, criteria.getPartOfTagName());
+        return tagDao.doFilter(tagFilterMap);
+    }
+
+    @Override
+    public void validate(Optional<Tag> entity) throws ObjectNotFoundException {
         if (entity.isEmpty()) {
-            throw new ObjectNotFoundException(format(ErrorCodes.OBJECT_NOT_FOUND_ID.message, entityName, id));
+            throw new ObjectNotFoundException(format(ErrorCodes.OBJECT_NOT_FOUND_ID.message));
         }
     }
+
 }
